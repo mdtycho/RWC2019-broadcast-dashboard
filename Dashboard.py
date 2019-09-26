@@ -105,7 +105,7 @@ def make_plot(field_name, palette):
 
     p = figure(title = verbage, 
                  plot_height = 700, plot_width = 1200,
-                 toolbar_location = None)
+                 toolbar_location = None, output_backend="webgl")
     p.xgrid.grid_line_color = None
     p.ygrid.grid_line_color = None
     p.axis.visible = False
