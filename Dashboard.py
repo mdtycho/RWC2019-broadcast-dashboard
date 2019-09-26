@@ -97,8 +97,6 @@ def make_plot(field_name, palette):
     to_verbage = {'business_model': 'Business Model', 'ownership' : 'Ownership'}
     
     categories = ds[field_name].unique()
-    print('categories')
-    print(categories)
     
     color_mapper = CategoricalColorMapper(palette = palette, factors = categories, nan_color = '#d9d9d9')
 
