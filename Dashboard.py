@@ -194,7 +194,7 @@ curdoc().add_root(layout)
 # Use the following code to test in a notebook
 # Interactive features will no show in notebook
 # output_notebook()
-# show(p)
+show(p)
 
 
 # ## * * End of main code
