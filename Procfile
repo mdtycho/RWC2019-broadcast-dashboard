@@ -1,1 +1,1 @@
-web: bokeh serve --port=$PORT --address=0.0.0.0 --allow-websocket-origin=rwc2019-broadcast-dashboard.herokuapp.com/ --use-xheaders Dashboard.py
+web: bokeh serve --port=$PORT --num-procs=0 --address=0.0.0.0 --allow-websocket-origin=* --use-xheaders Dashboard.py
