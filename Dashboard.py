@@ -170,8 +170,9 @@ palette = brewer['Dark2'][5]
 
 # Add hover tool
 hover = HoverTool(tooltips = [ ('Country','@NAME'),
-                               ('Continent', '@Continent'),
-                               ('Broadcaster', '@Company')])
+                               ('Ownership', '@ownership'),
+                               ('Broadcaster', '@Company'),
+                               ('Business Model', '@business_model')])
 
 # Call the plotting function
 p = make_plot(input_field, palette)
