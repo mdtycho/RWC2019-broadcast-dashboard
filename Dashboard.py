@@ -21,6 +21,8 @@ from bokeh.layouts import widgetbox, row, column
 
 from bokeh.core.properties import value
 
+from flask import Flask
+from jinja2 import Template
 
 ## Create the JSON Data for the GeoJSONDataSource
 
@@ -67,32 +69,37 @@ def get_ownership(val):
 
 
 # import dataset
-
-ds = gpd.read_file('new_ds.shp')
-
-
-ds.crs = {'init': 'epsg:4326'}
+def import_ds():
 
 
-#Drop row corresponding to 'Antarctica'
-ds = ds.drop(ds.index[246])
+    ds = gpd.read_file('new_ds.shp')
+
+
+    ds.crs = {'init': 'epsg:4326'}
+
+
+    #Drop row corresponding to 'Antarctica'
+    ds = ds.drop(ds.index[246])
 
 
 
-ds['business_model'] = ds['Model (0=t'].apply(lambda x: get_model(x))
+    ds['business_model'] = ds['Model (0=t'].apply(lambda x: get_model(x))
 
-ds['ownership'] = ds['Privately'].apply(lambda x: get_ownership(x))
+    ds['ownership'] = ds['Privately'].apply(lambda x: get_ownership(x))
 
 
-ds_nulls = ds[ds.isnull().any(axis=1)]
+    ds_nulls = ds[ds.isnull().any(axis=1)]
 
-ds = ds.dropna()
+    ds = ds.dropna()
 
-ds_nulls.crs = ds.crs
+    ds_nulls.crs = ds.crs
+
+    return (ds, ds_nulls)
 
 
 # Create a plotting function
 def make_plot(field_name, palette):
+
     
     to_verbage = {'business_model': 'Business Model', 'ownership' : 'Ownership'}
     
@@ -154,6 +161,7 @@ def update_plot(attr, old, new):
     geosource.geojson = new_data
 
 
+ds, ds_nulls = import_ds()
 # Input geojson source that contains features for plotting for:
 # initial year 2018 and initial criteria sale_price_median
 geosource = GeoJSONDataSource(geojson = json_data(ds))
