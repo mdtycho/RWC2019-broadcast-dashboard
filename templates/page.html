@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-1.3.4.min.js"></script>
+  <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-gl-1.3.4.min.js"></script> 
+  <script type="text/javascript"> Bokeh.set_log_level("info"); </script>
+  <script type = "text/javascript"src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script> 
+  <link rel = "stylesheet" href = "static\public.css">
+</head>
+<body>
+  <script type = "text/javascript">
+//paste this code under the head tag or in a separate js file.
+	// Wait for window load
+	$(window).on("load", function() {
+		// Animate loader off screen
+		$(".se-pre-con").fadeOut("slow");
+	});
+</script>
+
+  <form action="/" id="form1">
+    <select name="input_field" title="Selected Criteria: " id='select-001' onchange="$('#form1').submit()">
+      {% for field in fields %}
+      <!--
+        {% if field == to_verbage[current_field] %}
+          <option selected value="{{ field }}">{{ to_verbage[field] }}</option> 
+        {% else %} 
+          <option value="{{ field }}">{{ to_verbage[field] }}</option> 
+        {% endif %}
+      -->
+      <option value="{{ field }}">{{ to_verbage[field] }}</option>
+      {% endfor %}
+    </select>
+    <input type="submit">
+  </form>
+  <script type = "text/javascript">
+    $('#select-001').on("load", function(){
+      $(this).val({{current_field}});
+      $(this).text({{to_verbage[current_field]}});
+    })
+  </script>
+
+  {{ script|safe }}
+  {{ div|safe }}
+</body>
+
+<!--Loading animation -->
+
+<div class="se-pre-con"></div>

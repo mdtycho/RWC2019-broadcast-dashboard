@@ -21,8 +21,11 @@ from bokeh.layouts import widgetbox, row, column
 
 from bokeh.core.properties import value
 
-from flask import Flask
-from jinja2 import Template
+from bokeh.embed import json_item, components
+from bokeh.resources import CDN
+
+from flask import Flask, render_template, request
+#from jinja2 import Template
 
 ## Create the JSON Data for the GeoJSONDataSource
 
@@ -159,6 +162,9 @@ def update_plot(attr, old, new):
     
     # Update the data
     geosource.geojson = new_data
+## Use flask
+
+app = Flask(__name__)
 
 
 ds, ds_nulls = import_ds()
@@ -171,39 +177,96 @@ geosource_nulls = GeoJSONDataSource(geojson = json_data(ds_nulls))
 input_field = 'business_model'
 
 # Define a categorical color hue for 5 possible values (including nans which are false in the data)
-palette = brewer['Dark2'][5]
+# palette = brewer['Dark2'][5]
 
 # Reverse color order so that dark blue is highest obesity.
 # palette = palette[::-1]
 
 # Add hover tool
 hover = HoverTool(tooltips = [ ('Country','@NAME'),
-                               ('Ownership', '@ownership'),
-                               ('Broadcaster', '@Company'),
-                               ('Business Model', '@business_model')])
+                                ('Ownership', '@ownership'),
+                                ('Broadcaster', '@Company'),
+                                ('Business Model', '@business_model')])
 
 # Call the plotting function
-p = make_plot(input_field, palette)
+# p = make_plot(input_field, palette)
 
 # Make a slider object: slider 
 # slider = Slider(title = 'Year',start = 2009, end = 2018, step = 1, value = 2018)
 # slider.on_change('value', update_plot)
 
 # Make a selection object: select
-select = Select(title='Select Criteria:', value='Business Model', options=['Business Model', 'Ownership'])
-select.on_change('value', update_plot)
+# select = Select(title='Select Criteria:', value='Business Model', options=['Business Model', 'Ownership'])
+# select.on_change('value', update_plot)
 
-# Make a column layout of widgetbox(slider) and plot, and add it to the current document
-# Display the current document
-layout = column(p, widgetbox(select))
-curdoc().add_root(layout)
+# # Make a column layout of widgetbox(slider) and plot, and add it to the current document
+# # Display the current document
+# layout = column(p, widgetbox(select))
+# curdoc().add_root(layout)
 
-# Use the following code to test in a notebook
-# Interactive features will no show in notebook
-# output_notebook()
-#show(p)
+# # Use the following code to test in a notebook
+# # Interactive features will no show in notebook
+# # output_notebook()
+# #show(p)
+
+# current_field = input_field
 
 
 # ## * * End of main code
 
 # ## Bokeh server
+
+# page = Template("""
+# <!DOCTYPE html>
+# <html lang="en">
+# <head>
+#   {{ resources }}
+#   <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-1.3.4.min.js"></script>
+# </head>
+# <body>
+#   <div id="myplot"></div>
+#   <script>
+#   fetch('/plot')
+#     .then(function(response) { return response.json(); })
+#     .then(function(item) { Bokeh.embed.embed_item(item); })
+#   </script>
+# </body>
+# """)
+
+def get_palette(field):
+    if field == 'business_model':
+        return brewer['Dark2'][5]
+    else:
+        return ['#3385ff', '#ff1a1a']
+
+@app.route('/')
+def index():
+    to_verbage = {'business_model': 'Business Model', 'ownership' : 'Ownership'}
+    # determine selected field
+    current_field = request.args.get("input_field")
+    if current_field == None:
+        current_field = 'business_model'
+    # create plot
+    p = make_plot(current_field, get_palette(current_field))
+    # Make a column layout of widgetbox(slider) and plot, and add it to the current document
+    # Display the current document
+    layout = column(p)
+    curdoc().add_root(layout)
+
+    # Use the following code to test in a notebook
+    # Interactive features will no show in notebook
+    # output_notebook()
+    #show(p)
+
+    current_field = input_field
+
+    # Embed plot into HTML via Flask Render
+    script, div = components(p)
+    return render_template("page.html",script = script, div = div, template = Flask, 
+    current_field = current_field, fields = ['ownership', 'business_model'], to_verbage = to_verbage)
+
+# With debug=True, Flask server will auto-reload 
+# when there are code changes
+if __name__ == '__main__':
+    print('test')
+    app.run(port=5001, debug=True)
