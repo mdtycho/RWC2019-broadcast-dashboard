@@ -1,1 +1,1 @@
-web: bokeh serve --port=$PORT --num-procs=0 --address=0.0.0.0 --allow-websocket-origin=* --use-xheaders Dashboard.py
+web: gunicorn -w 3 Dashboard:app --preload --max-requests 1200
