@@ -1,0 +1,35 @@
+<!--
+  <div class = "container">
+    <div class = "row">
+      {{ div|safe }}
+    </div>
+
+    <form action="/" id="form1" class = "form-inline form-row">
+      <div class = "form-group">
+        <select name="input_field" title="Selected Criteria: " class="form-control form-control-sm" id='select-001' onchange="$('#form1').submit()">
+          {% for field in fields %}
+          <!--
+            {% if field == to_verbage[current_field] %}
+              <option selected value="{{ field }}">{{ to_verbage[field] }}</option> 
+            {% else %} 
+              <option value="{{ field }}">{{ to_verbage[field] }}</option> 
+            {% endif %}
+          -->
+          <option value="{{ field }}">{{ to_verbage[field] }}</option>
+          {% endfor %}
+        </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+  </div>
+-->
+
+2nd paste
+
+ <!--
+            {% if field == to_verbage[current_field] %}
+              <option selected value="{{ field }}">{{ to_verbage[field] }}</option> 
+            {% else %} 
+              <option value="{{ field }}">{{ to_verbage[field] }}</option> 
+            {% endif %}
+          -->

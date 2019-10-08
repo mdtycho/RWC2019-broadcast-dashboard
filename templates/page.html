@@ -1,51 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-1.3.4.min.js"></script>
-  <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-gl-1.3.4.min.js"></script> 
-  <script type="text/javascript"> Bokeh.set_log_level("info"); </script>
-  <script type = "text/javascript"src="https://code.jquery.com/jquery-3.4.1.min.js"
-  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-  crossorigin="anonymous"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script> 
-  <link rel = "stylesheet" href = "static\public.css">
+    <title>RWC2019 Official Broadcasters Dashboard</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-1.3.4.min.js"></script>
+    <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-gl-1.3.4.min.js"></script>
+    <script type="text/javascript">
+        Bokeh.set_log_level("info");
+    </script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+    <link rel="stylesheet" href="static\public.css">
 </head>
+
 <body>
-  <script type = "text/javascript">
-//paste this code under the head tag or in a separate js file.
-	// Wait for window load
-	$(window).on("load", function() {
-		// Animate loader off screen
-		$(".se-pre-con").fadeOut("slow");
-	});
-</script>
+    <script type="text/javascript">
+        //paste this code under the head tag or in a separate js file.
+        // Wait for window load
+        $(window).on("load", function() {
+            // Animate loader off screen
+            $(".se-pre-con").fadeOut("slow");
+        });
+    </script>
 
-  <form action="/" id="form1">
-    <select name="input_field" title="Selected Criteria: " id='select-001' onchange="$('#form1').submit()">
-      {% for field in fields %}
-      <!--
-        {% if field == to_verbage[current_field] %}
-          <option selected value="{{ field }}">{{ to_verbage[field] }}</option> 
-        {% else %} 
-          <option value="{{ field }}">{{ to_verbage[field] }}</option> 
-        {% endif %}
-      -->
-      <option value="{{ field }}">{{ to_verbage[field] }}</option>
-      {% endfor %}
-    </select>
-    <input type="submit">
-  </form>
-  <script type = "text/javascript">
-    $('#select-001').on("load", function(){
-      $(this).val({{current_field}});
-      $(this).text({{to_verbage[current_field]}});
-    })
-  </script>
+    {{ script|safe }}
+    <div class="container">
+        <div class="row">
+            <header>
+                <hgroup>
+                    <h1 class="h1 text-center text-sm">
+                        Rugby World Cup 2019 Official Broadcasters by Country.
+                        <small class="text-muted text-left">Currently showing the {{to_verbage[current_field].lower()}} of the broadcasters.</small>
+                    </h1>
+                </hgroup>
+            </header>
+        </div>
+        <div class="row">
+            {{ div|safe }}
+        </div>
 
-  {{ script|safe }}
-  {{ div|safe }}
+        <form action="/" id="form1" class="form-inline justify-content-end">
+            <div class="form-group mb-2">
+                <select name="input_field" title="Selected Criteria:" class="form-control form-control-lg" id='select-001' onchange="$('#form1').submit()">
+                  {% for field in fields %}
+                    {% if field == current_field %}
+                      <option selected value="{{ current_field }}">{{ to_verbage[field] }}</option> 
+                    {% else %} 
+                      <option value="{{ field }}">{{ to_verbage[field] }}</option> 
+                    {% endif %}
+                  {% endfor %}
+              </select>
+            </div>
+        </form>
+    </div>
+
+    <!--Loading animation-->
+
+    <div class="se-pre-con"></div>
+
 </body>
 
-<!--Loading animation -->
 
-<div class="se-pre-con"></div>
+</html>

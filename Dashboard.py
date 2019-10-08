@@ -115,7 +115,7 @@ def make_plot(field_name, palette):
 
     p = figure(title = verbage, 
                  plot_height = 700, plot_width = 1200,
-                 toolbar_location = None, output_backend="webgl")
+                 toolbar_location = "left", toolbar_sticky = False,output_backend="webgl", sizing_mode='scale_both')
     p.xgrid.grid_line_color = None
     p.ygrid.grid_line_color = None
     p.axis.visible = False
@@ -125,43 +125,23 @@ def make_plot(field_name, palette):
         p.circle(x=[], y=[], fill_color=color, legend=factor)
 
     # Add patch renderer to figure. 
-    p.patches('xs','ys', source = geosource, fill_color = {'field' : field_name, 'transform' : color_mapper},
+    data_patches = p.patches('xs','ys', source = geosource, fill_color = {'field' : field_name, 'transform' : color_mapper},
               line_color = 'black', line_width = 0.25, fill_alpha = 1)
     
-    p.patches('xs','ys', source = geosource_nulls, fill_color = '#d9d9d9',
-              line_color = 'black', line_width = 0.25, fill_alpha = 1)
+    null_patches = p.patches('xs','ys', source = geosource_nulls, fill_color = '#d9d9d9',
+              line_color = 'grey', line_width = 0.25, fill_alpha = 1)
+
+    # enable tooltip only for countries that have official broadcasters
+    hover_data.renderers = [data_patches]
+
+    # tooltip for countries without official broadcasters
+    hover_null.renderers = [null_patches]
 
     # Add the hover tool to the graph
-    p.add_tools(hover)
+    p.add_tools(hover_data, hover_null)
     return p
 
 
-# Define the callback function: update_plot
-def update_plot(attr, old, new):
-    to_input_field = {'Business Model' : 'business_model', 'Ownership': 'ownership'}
-    new_data = json_data(ds)
-    
-    # The input cr is the criteria selected from the select box
-    cr = select.value
-    input_field = to_input_field[cr]
-    
-    num_categories = int(ds[input_field].nunique())
-    
-    if num_categories == 2:
-        palette = ['#3385ff', '#ff1a1a']
-    else:
-        palette = brewer['Dark2'][num_categories]
-    
-    # Update the plot based on the changed inputs
-    p = make_plot(input_field, palette)
-    
-    # Update the layout, clear the old document and display the new document
-    layout = column(p, widgetbox(select))
-    curdoc().clear()
-    curdoc().add_root(layout)
-    
-    # Update the data
-    geosource.geojson = new_data
 ## Use flask
 
 app = Flask(__name__)
@@ -183,10 +163,12 @@ input_field = 'business_model'
 # palette = palette[::-1]
 
 # Add hover tool
-hover = HoverTool(tooltips = [ ('Country','@NAME'),
-                                ('Ownership', '@ownership'),
+hover_data = HoverTool(tooltips = [ ('Country','@NAME'),
                                 ('Broadcaster', '@Company'),
+                                ('Ownership', '@ownership'),
                                 ('Business Model', '@business_model')])
+
+hover_null = HoverTool(tooltips = [ ('Country','@NAME')])
 
 # Call the plotting function
 # p = make_plot(input_field, palette)
@@ -250,7 +232,7 @@ def index():
     p = make_plot(current_field, get_palette(current_field))
     # Make a column layout of widgetbox(slider) and plot, and add it to the current document
     # Display the current document
-    layout = column(p)
+    layout = column(p, sizing_mode='scale_both')
     curdoc().add_root(layout)
 
     # Use the following code to test in a notebook
@@ -258,7 +240,7 @@ def index():
     # output_notebook()
     #show(p)
 
-    current_field = input_field
+    #current_field = input_field
 
     # Embed plot into HTML via Flask Render
     script, div = components(p)
