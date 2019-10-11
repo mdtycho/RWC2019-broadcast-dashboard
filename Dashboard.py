@@ -27,6 +27,9 @@ from bokeh.resources import CDN
 from flask import Flask, render_template, request
 #from jinja2 import Template
 
+# compresses static css and js
+from flask_static_compress import FlaskStaticCompress
+
 ## Create the JSON Data for the GeoJSONDataSource
 
 
@@ -144,7 +147,10 @@ def make_plot(field_name, palette):
 
 ## Use flask
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static", template_folder="templates")
+
+# initialise static file compressor
+compress = FlaskStaticCompress(app)
 
 
 ds, ds_nulls = import_ds()

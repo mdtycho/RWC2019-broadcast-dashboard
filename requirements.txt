@@ -5,3 +5,4 @@ geopandas
 bokeh
 flask
 gunicorn
+flask-static-compress
