@@ -26,10 +26,10 @@
     <script type="text/javascript">
         //paste this code under the head tag or in a separate js file.
         // Wait for window load
-        /*$(window).on("load", function() {
+        $(window).on("load", function() {
             // Animate loader off screen
             $(".se-pre-con").fadeOut("slow");
-        });*/
+        });
     </script>
     {{ script|safe }}
     <div class="container">
@@ -43,7 +43,9 @@
             </header>
         </div>
         <div class="row plots">
-            {{ div|safe }}
+            <div class="col col-lg-12 colm-md-12 col-sm-12">
+                {{ div|safe }}
+            </div>
         </div>
         <form action="/country" id="form2" class="form-inline justify-content-end">
             <div class="form-group mb-2">

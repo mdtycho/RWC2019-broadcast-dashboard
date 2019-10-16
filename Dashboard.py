@@ -12,7 +12,7 @@ import json
 
 from bokeh.io import output_notebook, output_file, show
 from bokeh.plotting import figure
-from bokeh.models import GeoJSONDataSource, CategoricalColorMapper, CustomJS, OpenURL, TapTool
+from bokeh.models import GeoJSONDataSource, CategoricalColorMapper, Legend, LegendItem, OpenURL, TapTool
 from bokeh.palettes import brewer
 
 from bokeh.io.doc import curdoc
@@ -197,7 +197,9 @@ def make_plot(field_name, palette):
     pie.wedge(x=0, y=1, radius=0.2,
         start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
         line_color="white", fill_color={'field' : field_name, 'transform' : color_mapper}, 
-        source=pie_data[field_name] )
+        source=pie_data[field_name] , legend=field_name)
+
+    pie.legend.location = "bottom_right"
 
     pie.axis.axis_label=None
     pie.axis.visible=False
@@ -207,6 +209,8 @@ def make_plot(field_name, palette):
     # legend workaround from https://github.com/bokeh/bokeh/issues/5904
     for factor, color in zip(color_mapper.factors, color_mapper.palette):
         p.circle(x=[], y=[], fill_color=color, legend=factor)
+        p.legend.location = "bottom_left"
+
 
     # Add patch renderer to figure. 
     data_patches = p.patches('xs','ys', source = geosource, fill_color = {'field' : field_name, 'transform' : color_mapper},
@@ -219,7 +223,10 @@ def make_plot(field_name, palette):
               nonselection_fill_color = '#d9d9d9', selection_fill_alpha = 1, nonselection_fill_alpha = 1,
               selection_line_color = 'grey', nonselection_line_color = 'grey')
 
-    
+    # # try legend
+
+    # legend = Legend(items=[LegendItem(label = color_mapper.factors[i], renderers=[data_patches], 
+    # index = i, name = color_mapper.factors[i]) for i in range(len(color_mapper.factors))])
 
     # enable tooltip only for countries that have official broadcasters
     hover_data.renderers = [data_patches]
@@ -229,6 +236,7 @@ def make_plot(field_name, palette):
 
     # Add the hover tools to the graph as well as the taptool
     p.add_tools(hover_data, hover_null, taptool)
+
     return column(p, pie)
 
 

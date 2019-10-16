@@ -9,6 +9,7 @@ from bokeh.layouts import gridplot
 def make_country_plot(country, compare_to=False):
     df1 = pd.read_csv('country_data/press_freedom_clean.csv')
     df1.sort_values('Year', ascending=False, inplace=True)
+    df1['Press Freedom Index'] = df1['Press Freedom Index']*-1
 
     df2 = pd.read_csv('country_data/reg_credit_labour_business_clean.csv')
     df2.sort_values('Year', ascending=False, inplace=True)
@@ -38,9 +39,19 @@ def make_country_plot(country, compare_to=False):
     sizing_mode='scale_both', background_fill_color="#fafafa", tools=TOOLS)
     # add a line renderer
     p1.line(x1,y1, line_dash=(4, 4), line_width=2, color = '#85e0e0', legend = country)
-    p1.circle(x1,y1)
+    p1.circle(x1,y1, legend = country)
     p1.xgrid.grid_line_color = None
     p1.ygrid.grid_line_color = None
+    p1.legend.location = "top_center"
+
+    p1.xaxis.major_tick_line_color = None  # turn off x-axis major ticks
+    p1.xaxis.minor_tick_line_color = None  # turn off x-axis minor ticks
+
+    p1.yaxis.major_tick_line_color = None  # turn off y-axis major ticks
+    p1.yaxis.minor_tick_line_color = None  # turn off y-axis minor ticks
+
+
+
 
     p1.add_tools(hover_line)
 
@@ -48,9 +59,16 @@ def make_country_plot(country, compare_to=False):
     sizing_mode='scale_both', background_fill_color="#fafafa", tools=TOOLS)
     # add a line renderer
     p2.line(x2,y2, line_dash=(4, 4), line_width=2, color = '#85e0e0', legend = country)
-    p2.circle(x2,y2)
+    p2.circle(x2,y2, legend = country)
     p2.xgrid.grid_line_color = None
     p2.ygrid.grid_line_color = None
+    p2.legend.location = "top_center"
+
+    p2.xaxis.major_tick_line_color = None  # turn off x-axis major ticks
+    p2.xaxis.minor_tick_line_color = None  # turn off x-axis minor ticks
+
+    p2.yaxis.major_tick_line_color = None  # turn off y-axis major ticks
+    p2.yaxis.minor_tick_line_color = None  # turn off y-axis minor ticks
 
     p2.add_tools(hover_line)
 
@@ -59,9 +77,16 @@ def make_country_plot(country, compare_to=False):
     sizing_mode='scale_both', background_fill_color="#fafafa", tools=TOOLS)
     # add a line renderer
     p3.line(x3,y3, line_dash=(4, 4), line_width=2, color = '#85e0e0', legend = country)
-    p3.circle(x3,y3)
+    p3.circle(x3,y3, legend = country)
     p3.xgrid.grid_line_color = None
     p3.ygrid.grid_line_color = None
+    p3.legend.location = "top_center"
+
+    p3.xaxis.major_tick_line_color = None  # turn off x-axis major ticks
+    p3.xaxis.minor_tick_line_color = None  # turn off x-axis minor ticks
+
+    p3.yaxis.major_tick_line_color = None  # turn off y-axis major ticks
+    p3.yaxis.minor_tick_line_color = None  # turn off y-axis minor ticks
 
     p3.add_tools(hover_line)
 
@@ -70,9 +95,16 @@ def make_country_plot(country, compare_to=False):
     sizing_mode='scale_both', background_fill_color="#fafafa", tools=TOOLS)
     # add a line renderer
     p4.line(x4,y4, line_dash=(4, 4), line_width=2, color = '#85e0e0', legend = country)
-    p4.circle(x4,y4)
+    p4.circle(x4,y4, legend = country)
     p4.xgrid.grid_line_color = None
     p4.ygrid.grid_line_color = None
+    p4.legend.location = "top_center"
+
+    p4.xaxis.major_tick_line_color = None  # turn off x-axis major ticks
+    p4.xaxis.minor_tick_line_color = None  # turn off x-axis minor ticks
+
+    p4.yaxis.major_tick_line_color = None  # turn off y-axis major ticks
+    p4.yaxis.minor_tick_line_color = None  # turn off y-axis minor ticks
 
     p4.add_tools(hover_line)
 
@@ -86,16 +118,16 @@ def make_country_plot(country, compare_to=False):
         x42, y42, t42 = df4[df4['Country'] == compare_to]['Year'], df4[df4['Country'] == compare_to]['Efficiency of legal framework in challenging government regulations.'], df4.columns[2]
 
         p1.line(x12,y12, line_dash=(4, 4), line_width=2, color = '#ff1aff', legend = compare_to)
-        p1.circle(x12,y12, color = '#ff1aff')
+        p1.circle(x12,y12, color = '#ff1aff', legend = compare_to)
 
         p2.line(x22,y22, line_dash=(4, 4), line_width=2, color = '#ff1aff', legend = compare_to)
-        p2.circle(x22,y22, color = '#ff1aff')
+        p2.circle(x22,y22, color = '#ff1aff', legend = compare_to)
 
         p3.line(x32,y32, line_dash=(4, 4), line_width=2, color = '#ff1aff', legend = compare_to)
-        p3.circle(x32,y32, color = '#ff1aff')
+        p3.circle(x32,y32, color = '#ff1aff', legend = compare_to)
 
         p4.line(x42,y42, line_dash=(4, 4), line_width=2, color = '#ff1aff', legend = compare_to)
-        p4.circle(x42,y42, color = '#ff1aff')
+        p4.circle(x42,y42, color = '#ff1aff', legend = compare_to)
 
     # make a grid
     grid = gridplot([[p1, p2], [p3, p4]], sizing_mode='scale_both', plot_width=1200, plot_height=850)
