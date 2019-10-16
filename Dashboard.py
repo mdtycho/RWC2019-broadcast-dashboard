@@ -12,25 +12,73 @@ import json
 
 from bokeh.io import output_notebook, output_file, show
 from bokeh.plotting import figure
-from bokeh.models import GeoJSONDataSource, LinearColorMapper, ColorBar, NumeralTickFormatter, CategoricalColorMapper
+from bokeh.models import GeoJSONDataSource, CategoricalColorMapper, CustomJS, OpenURL, TapTool
 from bokeh.palettes import brewer
 
 from bokeh.io.doc import curdoc
 from bokeh.models import Slider, HoverTool, Select
-from bokeh.layouts import widgetbox, row, column
+from bokeh.layouts import widgetbox, row, column, gridplot
+from bokeh.transform import cumsum
 
 from bokeh.core.properties import value
+
+from bokeh.events import Tap
 
 from bokeh.embed import json_item, components
 from bokeh.resources import CDN
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 #from jinja2 import Template
 
 # compresses static css and js
 from flask_static_compress import FlaskStaticCompress
 
+# import country plots module
+from country_plots import make_country_plot
+
 ## Create the JSON Data for the GeoJSONDataSource
+
+COUNTRIES_SELECT = ['Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola',
+       'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia',
+       'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh',
+       'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan',
+       'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil',
+       'Brunei', 'Bulgaria', 'Burkina Faso', 'Burma (Myanmar)', 'Burundi',
+       'Cambodia', 'Cameroon', 'Canada', 'Cape Verde',
+       'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia',
+       'Comoros', 'Congo (Brazzaville)', 'Congo (Kinshasa)', 'Costa Rica',
+       'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark',
+       'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt',
+       'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia',
+       'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon', 'Gambia',
+       'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala',
+       'Guinea', 'Guinea Bissau', 'Guyana', 'Haiti', 'Honduras',
+       'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran',
+       'Iraq', 'Ireland', 'Israel', 'Italy', 'Ivory Coast', 'Jamaica',
+       'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kosovo',
+       'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho',
+       'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg',
+       'Macedonia (F.Y.R.O.M.)', 'Madagascar', 'Malawi', 'Malaysia',
+       'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania',
+       'Mauritius', 'Mexico', 'Micronesia', 'Moldova', 'Monaco',
+       'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Namibia',
+       'Nauru', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua',
+       'Niger', 'Nigeria', 'North Korea', 'Norway', 'Oman', 'Pakistan',
+       'Palau', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru',
+       'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia',
+       'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia',
+       'Saint Thomas and Principe', 'Saint Vincent and Grenadines',
+       'Samoa', 'San Marino', 'Saudi Arabia', 'Senegal', 'Serbia',
+       'Serbia and Montenegro', 'Seychelles', 'Sierra Leone', 'Singapore',
+       'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'Somaliland',
+       'South Africa', 'South Korea', 'South Sudan', 'Spain', 'Sri Lanka',
+       'Sudan', 'Suriname', 'Swaziland', 'Sweden', 'Switzerland', 'Syria',
+       'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Timor Leste',
+       'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey',
+       'Turkmenistan', 'Tuvalu', 'Uganda', 'Ukraine',
+       'United Arab Emirates', 'United Kingdom', 'United States',
+       'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela', 'Vietnam',
+       'West Bank and Gaza', 'Yemen', 'Zambia', 'Zimbabwe']
 
 
 def json_data(df):
@@ -106,6 +154,8 @@ def import_ds():
 # Create a plotting function
 def make_plot(field_name, palette):
 
+    from math import pi
+
     
     to_verbage = {'business_model': 'Business Model', 'ownership' : 'Ownership'}
     
@@ -122,6 +172,37 @@ def make_plot(field_name, palette):
     p.xgrid.grid_line_color = None
     p.ygrid.grid_line_color = None
     p.axis.visible = False
+
+    # Add pie chart
+    x1 = {'Subscription.': 103, 'Free-to-view.': 10, 'Free-to-air.':16, 'Pay-per-view.':1,
+       'Rights are held by middle-man.':1}
+
+    x2 = {'Privately owned.':125, 'Government ownership.':6}
+
+    data1 = pd.Series(x1).reset_index(name='value').rename(columns={'index':'business_model'})
+
+    data2 = pd.Series(x2).reset_index(name='value').rename(columns={'index':'ownership'})
+
+    data1['angle'] = data1['value']/data1['value'].sum() * 2*pi
+
+    data2['angle'] = data2['value']/data2['value'].sum() * 2*pi
+
+    pie_data = {'business_model': data1, 'ownership': data2}
+
+    pie = figure(plot_height=200, title="", toolbar_location=None,
+           tools="hover", tooltips="@{}: @value".format(field_name), x_range=(-0.5, 1.0), output_backend="webgl", sizing_mode='scale_both')
+
+
+
+    pie.wedge(x=0, y=1, radius=0.2,
+        start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
+        line_color="white", fill_color={'field' : field_name, 'transform' : color_mapper}, 
+        source=pie_data[field_name] )
+
+    pie.axis.axis_label=None
+    pie.axis.visible=False
+    pie.grid.grid_line_color = None
+
     
     # legend workaround from https://github.com/bokeh/bokeh/issues/5904
     for factor, color in zip(color_mapper.factors, color_mapper.palette):
@@ -129,10 +210,16 @@ def make_plot(field_name, palette):
 
     # Add patch renderer to figure. 
     data_patches = p.patches('xs','ys', source = geosource, fill_color = {'field' : field_name, 'transform' : color_mapper},
-              line_color = 'black', line_width = 0.25, fill_alpha = 1)
+              line_color = 'black', line_width = 0.25, fill_alpha = 1, selection_fill_color = {'field' : field_name, 'transform' : color_mapper},
+              nonselection_fill_color = {'field' : field_name, 'transform' : color_mapper}, selection_fill_alpha = 1, nonselection_fill_alpha = 1, 
+              selection_line_color = 'black',nonselection_line_color = 'black')
     
     null_patches = p.patches('xs','ys', source = geosource_nulls, fill_color = '#d9d9d9',
-              line_color = 'grey', line_width = 0.25, fill_alpha = 1)
+              line_color = 'grey', line_width = 0.25, fill_alpha = 1, selection_fill_color = '#d9d9d9',
+              nonselection_fill_color = '#d9d9d9', selection_fill_alpha = 1, nonselection_fill_alpha = 1,
+              selection_line_color = 'grey', nonselection_line_color = 'grey')
+
+    
 
     # enable tooltip only for countries that have official broadcasters
     hover_data.renderers = [data_patches]
@@ -140,9 +227,9 @@ def make_plot(field_name, palette):
     # tooltip for countries without official broadcasters
     hover_null.renderers = [null_patches]
 
-    # Add the hover tool to the graph
-    p.add_tools(hover_data, hover_null)
-    return p
+    # Add the hover tools to the graph as well as the taptool
+    p.add_tools(hover_data, hover_null, taptool)
+    return column(p, pie)
 
 
 ## Use flask
@@ -175,6 +262,11 @@ hover_data = HoverTool(tooltips = [ ('Country','@NAME'),
                                 ('Business Model', '@business_model')])
 
 hover_null = HoverTool(tooltips = [ ('Country','@NAME')])
+
+# add taptool navigate to url
+taptool = TapTool()
+url = "/country?clicked_country=@NAME"
+taptool.callback = OpenURL(url=url)
 
 # Call the plotting function
 # p = make_plot(input_field, palette)
@@ -252,6 +344,38 @@ def index():
     script, div = components(p)
     return render_template("page.html",script = script, div = div, template = Flask, 
     current_field = current_field, fields = ['ownership', 'business_model'], to_verbage = to_verbage)
+
+@app.route('/country')
+def country_plots():
+    
+
+    country_map = {'Antigua and Barb.': 'Antigua and Barbuda','Bosnia and Herz.': 'Bosnia and Herzegovina',
+    'Myanmar': 'Burma (Myanmar)','Cabo Verde': 'Cape Verde','Central African Rep.': 'Central African Republic',
+    'Congo': 'Congo (Brazzaville)','Dem. Rep. Congo': 'Congo (Kinshasa)','Czechia': 'Czech Republic','Dominican Rep.': 'Dominican Republic',
+    'Eq. Guinea': 'Equatorial Guinea','Guinea-Bissau': 'Guinea Bissau',"CÃ´te d'Ivoire": 'Ivory Coast',
+    'Macedonia': 'Macedonia (F.Y.R.O.M.)','Marshall Is.': 'Marshall Islands','St. Kitts and Nevis': 'Saint Kitts and Nevis',
+    'SÃ£o TomÃ© and Principe': 'Saint Thomas and Principe','St. Vin. and Gren.': 'Saint Vincent and Grenadines',
+    'Serbia': 'Serbia and Montenegro','Solomon Is.': 'Solomon Islands','S. Sudan': 'South Sudan','eSwatini': 'Swaziland',
+    'Timor-Leste': 'Timor Leste','United States of America': 'United States','Palestine': 'West Bank and Gaza'}
+    clicked_country = request.args.get("clicked_country")
+
+    compare_to = request.args.get("compare_to")
+    if clicked_country == None:
+        return redirect("/", code = 303)
+    if compare_to == None:
+        # create plot
+        gp = make_country_plot(clicked_country if clicked_country not in country_map.keys() else country_map[clicked_country])
+    else:
+        gp = make_country_plot(clicked_country if clicked_country not in country_map.keys() else country_map[clicked_country], compare_to = compare_to)
+
+    # Make a column layout of widgetbox(slider) and plot, and add it to the current document
+    # Display the currentcurdoc document
+    #curdoc().add_root(p)
+
+    # Embed plot into HTML via Flask Render
+    script, div = components(gp)
+    return render_template("temp.html",script = script, div = div, template = Flask, 
+    clicked_country = clicked_country, countries = COUNTRIES_SELECT, compare_to = compare_to)
 
 # With debug=True, Flask server will auto-reload 
 # when there are code changes

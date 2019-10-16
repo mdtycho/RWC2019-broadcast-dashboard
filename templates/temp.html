@@ -18,59 +18,55 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="static/public.css">
 </head>
 
 <body>
-    {% compress 'js' %}
     <script type="text/javascript">
         //paste this code under the head tag or in a separate js file.
         // Wait for window load
-        $(window).on("load", function() {
+        /*$(window).on("load", function() {
             // Animate loader off screen
             $(".se-pre-con").fadeOut("slow");
-        });
+        });*/
     </script>
-    {{ script|safe }} {% endcompress %}
+    {{ script|safe }}
     <div class="container">
         <div class="row">
             <header>
                 <hgroup>
                     <h1 class="h1 text-center text-sm">
-                        Rugby World Cup 2019 Official Broadcasters by Country.
-                        <small class="text-muted text-left">Currently showing the {{to_verbage[current_field].lower()}} of the broadcasters.</small>
+                        Currently showing the plots for {{clicked_country}}.
                     </h1>
                 </hgroup>
             </header>
         </div>
-        <div class="row"></div>
-        <div class="row map">
-            <div class="col col-lg-12 colm-md-12 col-sm-12">
-                {{ div|safe }}
-            </div>
+        <div class="row plots">
+            {{ div|safe }}
         </div>
-
-        <form action="/" id="form1" class="form-inline justify-content-end">
+        <form action="/country" id="form2" class="form-inline justify-content-end">
             <div class="form-group mb-2">
-                <select name="input_field" title="Selected Criteria:" class="form-control form-control-lg" id='select-001' onchange="$('#form1').submit()">
-                  {% for field in fields %}
-                    {% if field == current_field %}
-                      <option selected value="{{ current_field }}">{{ to_verbage[field] }}</option> 
-                    {% else %} 
-                      <option value="{{ field }}">{{ to_verbage[field] }}</option> 
+                <label for="select-002">Compare to country:</label>
+                <select name="compare_to" title="Compare to:" class="form-control form-control-lg" id='select-002' onchange="$('#form2').submit()">
+                  {% for country in countries %}
+                  {% if country == compare_to %}
+                      <option selected value="{{ country }}">{{ country }}</option> 
+                   {% else %}
+                    <option value="{{ country }}">{{ country }}</option>
                     {% endif %}
                   {% endfor %}
               </select>
+                <select name="clicked_country" value="{{clicked_country}}" style="display: none;">
+                        <option selected value="{{clicked_country}}"></option>
+                </select>
             </div>
         </form>
     </div>
 
     <!--Loading animation-->
 
-    <div class="se-pre-con"></div>
+    <!-- <div class="se-pre-con"></div> -->
 
 </body>
 
